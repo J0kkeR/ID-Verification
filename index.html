@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>身份证号码校验 · 本地版</title>
+  <style>
+    :root { --ink:#102236; --muted:#65778b; --line:#dae4eb; --paper:#fff; --bg:#f2f6f8; --teal:#087f78; --teal-light:#dff6f0; --red:#b84846; --red-light:#fff0ed; --gold:#916423; --gold-light:#fff4df; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif; line-height:1.55; }
+    body::before { content:""; position:fixed; z-index:-1; inset:0 0 auto; height:420px; background:radial-gradient(circle at 78% 10%,#24576c 0,transparent 36%),linear-gradient(130deg,#10253a,#173b50 70%,#244e54); }
+    button,textarea { font:inherit; }
+    button { cursor:pointer; }
+    .shell { width:min(1180px,calc(100% - 36px)); margin:auto; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:26px 0; color:white; }
+    .brand { display:flex; align-items:center; gap:12px; font-size:17px; font-weight:750; letter-spacing:.02em; }
+    .brand-mark { display:grid; place-items:center; width:36px; height:36px; border-radius:11px; color:#123445; background:#85f3d3; font-weight:850; }
+    .local-pill { border:1px solid #63808d; background:#ffffff14; color:#def8f0; padding:8px 14px; border-radius:100px; font-size:13px; }
+    .hero { display:grid; grid-template-columns:1.5fr 1fr; gap:28px; align-items:end; color:white; padding:24px 0 33px; }
+    .eyebrow { margin:0 0 10px; color:#8ce7cd; font-size:12px; font-weight:800; letter-spacing:.18em; }
+    h1 { margin:0; font-size:clamp(30px,4.5vw,48px); line-height:1.15; letter-spacing:-.035em; }
+    .hero p:last-child { margin:15px 0 0; max-width:650px; color:#c5d4dd; font-size:15px; }
+    .hero-side { justify-self:end; border-left:1px solid #77919b; padding-left:24px; color:#d4e5e9; font-size:14px; }
+    .hero-side strong { display:block; margin-bottom:4px; color:#fff; font-size:19px; }
+    main { padding-bottom:44px; }
+    .input-card,.results-panel { border:1px solid #e3e9ed; border-radius:24px; background:var(--paper); box-shadow:0 18px 45px #0e31401a; }
+    .input-card { padding:26px; }
+    .section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+    h2 { margin:0; font-size:20px; letter-spacing:-.02em; }
+    .section-head p { margin:5px 0 0; color:var(--muted); font-size:13px; }
+    .hint { color:var(--teal); background:var(--teal-light); border-radius:100px; padding:7px 11px; font-size:12px; white-space:nowrap; }
+    textarea { display:block; width:100%; min-height:140px; margin:20px 0 16px; padding:17px 18px; resize:vertical; border:1px solid #ccd9e0; border-radius:15px; outline:0; background:#fbfdfd; color:var(--ink); font-size:16px; letter-spacing:.02em; transition:border-color .2s,box-shadow .2s; }
+    textarea:focus { border-color:#16a692; box-shadow:0 0 0 4px #27c6a326; }
+    textarea::placeholder { color:#98a8b5; }
+    .input-bottom { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+    .microcopy { color:#758697; font-size:12px; }
+    .actions { display:flex; gap:10px; }
+    .btn { min-height:42px; border-radius:11px; padding:0 19px; border:1px solid #cbd8df; background:#fff; color:#304b5e; font-weight:700; }
+    .btn:hover { border-color:#6eacaa; }
+    .btn-primary { border-color:#087f78; color:white; background:#087f78; box-shadow:0 8px 15px #087f782e; }
+    .btn-primary:hover { background:#046d67; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; margin:18px 0 25px; }
+    .stat { padding:17px 20px; border:1px solid #e1e9ed; border-radius:17px; background:#fff; }
+    .stat small { color:var(--muted); font-size:12px; }
+    .stat strong { display:block; margin-top:3px; font-size:27px; line-height:1.2; letter-spacing:-.03em; }
+    .stat:nth-child(2) strong { color:var(--teal); }
+    .stat:nth-child(3) strong { color:var(--gold); }
+    .stat:nth-child(4) strong { color:var(--red); }
+    .results-panel { padding:25px; }
+    .filters { display:flex; gap:7px; flex-wrap:wrap; }
+    .filter { border:0; border-radius:9px; padding:7px 12px; color:#607386; background:transparent; font-size:13px; font-weight:700; }
+    .filter.active { background:#e5f4f1; color:#086f68; }
+    .empty { text-align:center; padding:61px 15px 68px; color:var(--muted); }
+    .empty-icon { display:grid; place-items:center; width:54px; height:54px; margin:0 auto 15px; border:1px solid #d9e9e7; border-radius:17px; background:#ecf8f5; color:var(--teal); font-size:27px; }
+    .empty strong { display:block; margin-bottom:4px; color:#31485b; font-size:15px; }
+    .cards { display:grid; gap:14px; margin-top:18px; }
+    .result-card { overflow:hidden; border:1px solid var(--line); border-radius:17px; background:#fff; }
+    .result-card.pass { border-left:4px solid #1aab8a; }
+    .result-card.fail { border-left:4px solid #dc756c; }
+    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid #edf1f3; }
+    .card-head small { display:block; color:#7b8b99; font-size:11px; margin-bottom:3px; }
+    .id-number { overflow-wrap:anywhere; font-size:17px; font-weight:750; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+    .badge { display:inline-block; flex:none; border-radius:100px; padding:5px 10px; font-size:12px; font-weight:750; }
+    .badge.pass { background:var(--teal-light); color:var(--teal); }
+    .badge.fail { background:var(--red-light); color:var(--red); }
+    .badge.history { background:var(--gold-light); color:var(--gold); }
+    .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:19px; padding:19px 20px; }
+    .info-item small { display:block; margin-bottom:5px; color:#758697; font-size:12px; }
+    .info-item span { display:block; color:#193348; font-size:14px; font-weight:650; overflow-wrap:anywhere; }
+    .card-foot { display:flex; flex-wrap:wrap; gap:8px; padding:14px 20px; border-top:1px solid #edf1f3; background:#fbfdfd; }
+    .check { display:inline-flex; align-items:center; gap:5px; border-radius:7px; padding:5px 8px; font-size:12px; background:#eaf6f2; color:#138066; }
+    .check.bad { background:#fff0ed; color:#b74e49; }
+    .history-block,.error-block { margin:0 20px 17px; padding:14px 16px; border-radius:11px; font-size:13px; }
+    .town-block { margin:0 20px 17px; border:1px solid #d8e8e5; border-radius:11px; background:#f6fbfa; color:#235c57; font-size:13px; }
+    .town-block summary { cursor:pointer; padding:13px 16px; font-weight:750; }
+    .town-inner { padding:0 16px 15px; }
+    .town-inner p { margin:0 0 10px; color:#5d7977; }
+    .town-list { display:grid; grid-template-columns:repeat(3,1fr); gap:7px 14px; margin:0; padding:0; list-style:none; }
+    .town-list li { overflow-wrap:anywhere; padding:6px 8px; border-radius:7px; background:white; }
+    .town-list code { margin-right:6px; color:#668783; font-size:11px; }
+    .history-block { border:1px solid #f2deaf; background:#fffaf0; color:#705321; }
+    .error-block { border:1px solid #f5d7d3; background:#fff6f4; color:#a5413b; }
+    .history-block strong,.error-block strong { display:block; margin-bottom:5px; }
+    .history-block p,.error-block p { margin:4px 0 0; }
+    footer { text-align:center; padding:4px 0 35px; color:#8797a5; font-size:12px; }
+    @media(max-width:760px) { .hero { grid-template-columns:1fr; gap:8px; padding-top:10px; } .hero-side { justify-self:start; border-left:0; padding-left:0; } .section-head { flex-wrap:wrap; } .stats { grid-template-columns:repeat(2,1fr); } .info-grid,.town-list { grid-template-columns:repeat(2,1fr); } .input-card,.results-panel { padding:18px; } .card-head { padding:16px; } }
+    @media(max-width:470px) { .shell { width:min(100% - 24px,1180px); } header { padding:18px 0; } .local-pill { display:none; } .stats { gap:8px; } .stat { padding:13px; } .info-grid { grid-template-columns:1fr 1fr; gap:15px; padding:16px; } .actions { width:100%; } .actions .btn { flex:1; } .filters { margin-top:8px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark">ID</span><span>身份证号码校验</span></div>
+      <div class="local-pill">本地校验 · 数据不上传</div>
+    </header>
+    <section class="hero" aria-label="页面简介">
+      <div>
+        <p class="eyebrow">IDENTITY CHECK</p>
+        <h1>身份证<br>合法性校验</h1>
+        <p>核对号码格式、出生日期、区划代码和校验位；也可查询六位、九位或十二位区划代码。</p>
+      </div>
+      <div class="hero-side"><strong id="dataVersion">正在读取本地数据…</strong><span>现行与历史区划数据均来自项目文件</span></div>
+    </section>
+    <main>
+      <section class="input-card" aria-labelledby="inputTitle">
+        <div class="section-head">
+          <div><h2 id="inputTitle">输入身份证号或区划代码</h2><p>支持多条查询，每行一条，也可用逗号分隔。</p></div>
+          <span class="hint">仅在本机浏览器内计算</span>
+        </div>
+        <textarea id="idNumbers" aria-label="身份证号或区划代码" spellcheck="false" placeholder="输入 18 位身份证号，或 6 / 9 / 12 位区划代码&#10;多条查询请换行输入"></textarea>
+        <div class="input-bottom">
+          <span class="microcopy">校验结果仅供参考</span>
+          <div class="actions"><button class="btn" type="button" id="clearButton">清空</button><button class="btn btn-primary" type="button" id="checkButton">开始校验 →</button></div>
+        </div>
+      </section>
+      <section class="stats" aria-label="结果概览">
+        <div class="stat"><small>输入总数</small><strong id="totalCount">0</strong></div>
+        <div class="stat"><small>通过 / 找到</small><strong id="validCount">0</strong></div>
+        <div class="stat"><small>历史区域</small><strong id="historyCount">0</strong></div>
+        <div class="stat"><small>发现异常</small><strong id="invalidCount">0</strong></div>
+      </section>
+      <section class="results-panel" aria-labelledby="resultsTitle">
+        <div class="section-head">
+          <div><h2 id="resultsTitle">查询结果</h2><p>查看归属地、下辖乡镇街道、号码校验及历史记录。</p></div>
+          <div class="filters" role="group" aria-label="筛选结果">
+            <button class="filter active" type="button" data-filter="all">全部</button>
+            <button class="filter" type="button" data-filter="valid">通过 / 找到</button>
+            <button class="filter" type="button" data-filter="history">历史区域</button>
+            <button class="filter" type="button" data-filter="invalid">异常</button>
+          </div>
+        </div>
+        <div id="results" class="cards" aria-live="polite"></div>
+      </section>
+    </main>
+    <footer>Powered By J0kkeR</footer>
+  </div>
+  <script src="area_data.js"></script>
+  <script>
+    'use strict';
+    const source = window.IDV_DATA || null;
+    const input = document.getElementById('idNumbers');
+    const results = document.getElementById('results');
+    let currentResults = [];
+    let activeFilter = 'all';
+    const weight = [7,9,10,5,8,4,2,1,6,3,7,9,10,5,8,4,2];
+    const checkCodes = '10X98765432';
+
+    document.getElementById('dataVersion').textContent = source
+      ? `${source.version_year || '本地'} 年版区划数据`
+      : '本地数据未找到';
+
+    function element(tag, className, content) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (content !== undefined) node.textContent = content;
+      return node;
+    }
+
+    function placeName(record) {
+      return [record.p, record.a === '直辖' ? '' : record.a, record.d].filter(Boolean).join(' / ');
+    }
+
+    function historicalText(record) {
+      if (record.year) return `${record.year} 年版留存 · ${placeName(record)}`;
+      const end = record.to ? record.to - 1 : 2025;
+      return `${record.from}—${end} 年末 · ${placeName(record)}`;
+    }
+
+    function dedupeTowns(rows) {
+      const visible = rows.filter(row => row[0].length === 9).map(row => [row[0],row[1],[]]);
+      const nine = new Map(visible.map(row => [`${row[0]}:${row[1]}`,row]));
+      for (const row of rows) {
+        if (row[0].length !== 12) continue;
+        const parent = nine.get(`${row[0].slice(0,9)}:${row[1]}`);
+        if (parent) parent[2].push(row[0]);
+        else visible.push([row[0],row[1],[]]);
+      }
+      return visible.sort((left,right) => left[0].localeCompare(right[0]));
+    }
+
+    function validate(raw) {
+      const number = raw.trim().toUpperCase();
+      const isId = /^[0-9]{17}[0-9X]$/.test(number);
+      const isAreaCode = /^(?:[0-9]{6}|[0-9]{9}|[0-9]{12})$/.test(number);
+      const format = isId || isAreaCode;
+      const code = format ? number.slice(0,6) : '';
+      const current = source && format ? source.current[code] : null;
+      const allHistory = source && format ? (source.history[code] || []) : [];
+      const currentTownRows = source && format ? (source.towns?.[code] || []) : [];
+      const archivedTownRows = source && format ? (source.archived_towns?.[code] || []) : [];
+      const exactTown = isAreaCode && number.length > 6
+        ? (currentTownRows.find(row => row[0] === number) || archivedTownRows.find(row => row[0] === number) || null)
+        : null;
+      const townRows = dedupeTowns(currentTownRows.length ? currentTownRows : archivedTownRows);
+      const townSource = currentTownRows.length ? '现行数据'
+        : (archivedTownRows.length ? `${archivedTownRows[0][2]} 年版历史留存` : '无可用数据');
+      const place = current || allHistory[0] || null;
+      const history = current
+        ? allHistory.filter(item => !item.year || item.p !== current.p || item.a !== current.a || item.d !== current.d)
+        : allHistory;
+      const area = Boolean(place && (isId ? (place.d || townRows.length) : (number.length === 6 || exactTown)));
+      let birth = false, birthText = '—', age = '—', gender = '—', checksum = false;
+      if (isId) {
+        const year = Number(number.slice(6,10));
+        const month = Number(number.slice(10,12));
+        const day = Number(number.slice(12,14));
+        const date = new Date(year,month-1,day);
+        const now = new Date();
+        birth = year >= 1000 && date.getFullYear() === year && date.getMonth() === month-1 && date.getDate() === day && date <= now;
+        if (birth) {
+          birthText = `${year}年${month}月${day}日`;
+          age = now.getFullYear()-year - (now.getMonth()+1 < month || (now.getMonth()+1 === month && now.getDate() < day) ? 1 : 0);
+        }
+        gender = Number(number[16]) % 2 ? '男' : '女';
+        const total = weight.reduce((sum,w,index) => sum + Number(number[index])*w,0);
+        checksum = number[17] === checkCodes[total % 11];
+      }
+      const reasons = [];
+      if (!format) reasons.push('请输入 18 位身份证号，或 6 / 9 / 12 位数字区划代码');
+      else {
+        if (!area) reasons.push(isId ? '未找到可用于身份证的地址区划代码' : '未找到此区划代码');
+        if (isId && !birth) reasons.push('出生日期无效');
+        if (isId && !checksum) reasons.push('末位校验码不匹配');
+      }
+      const archivedExact = Boolean(exactTown && exactTown.length > 2);
+      const kind = archivedExact ? '历史区域' : (current ? current.kind : (area ? '历史区域' : '未知'));
+      const dataSource = archivedExact ? `民政部行政区划数据（${exactTown[2]}年版历史留存）` : current
+        ? (current.kind === '补充代码' ? '补充区划资料' : `民政部行政区划数据（${source.version_year || '本地'}年版）`)
+        : (allHistory[0] && allHistory[0].year ? `民政部行政区划数据（${allHistory[0].year}年版历史留存）` : (area ? '历年行政区划资料' : '未知'));
+      return { number, isId, valid:reasons.length === 0, format, birth, area, checksum, code:code || '—', place, kind, history, birthText, age, gender, dataSource, reasons, townRows, townSource, exactTown };
+    }
+
+    function detail(label,value) {
+      const item = element('div','info-item');
+      item.append(element('small','',label),element('span','',String(value)));
+      return item;
+    }
+
+    function renderCard(item) {
+      const card = element('article',`result-card ${item.valid ? 'pass' : 'fail'}`);
+      const head = element('div','card-head');
+      const title = element('div','');
+      title.append(element('small','',item.isId ? '身份证号码' : '区划代码'),element('div','id-number',item.number));
+      head.append(title,element('span',`badge ${item.valid ? 'pass' : 'fail'}`,item.valid ? (item.isId ? '规则通过' : '已找到') : '存在异常'));
+      card.append(head);
+      const grid = element('div','info-grid');
+      grid.append(detail('归属地',item.place ? placeName(item.place) : '未知'),detail('区划记录',item.kind));
+      if (item.isId) grid.append(
+        detail('出生日期',item.birthText),
+        detail('年龄',item.age === '—' ? '—' : `${item.age} 岁`),
+        detail('性别',item.gender),
+        detail('地址区划代码',item.code),
+        detail('具体乡镇街道','身份证号码无法确定')
+      );
+      else if (item.exactTown) grid.append(detail('乡镇街道',item.exactTown[1]));
+      grid.append(detail('下辖乡镇街道',`${item.townRows.length} 条`),detail('乡镇数据版本',item.townSource),detail('数据来源',item.dataSource));
+      card.append(grid);
+      const checks = element('div','card-foot');
+      const checksToShow = item.isId
+        ? [['格式',item.format],['日期',item.birth],['地址区划',item.area],['校验位',item.checksum]]
+        : [['格式',item.format],['区划记录',item.area]];
+      for (const [label,ok] of checksToShow) {
+        checks.append(element('span',`check ${ok ? '' : 'bad'}`,`${ok ? '✓' : '×'} ${label}`));
+      }
+      if (item.kind === '历史区域') checks.append(element('span','badge history','历史区域'));
+      card.append(checks);
+      if (item.place && (item.place.d || item.townRows.length)) {
+        const block = element('details','town-block');
+        block.open = true;
+        block.append(element('summary','',`下辖乡镇街道（${item.townRows.length} 条）`));
+        const inner = element('div','town-inner');
+        inner.append(element('p','',item.townRows.length
+          ? `资料版本：${item.townSource}。${item.isId ? '以下为该地区的下辖区域，无法据此确定持证人的具体乡镇街道。' : '以下为该地区的下辖区域。'}`
+          : '本地资料暂无该地区的乡镇街道明细。'));
+        if (item.townRows.length) {
+          const list = element('ul','town-list');
+          for (const row of item.townRows) {
+            const entry = element('li','');
+            entry.append(element('code','',row[0]),element('span','',row[1]));
+            if (row[2].length) entry.append(element('small','',` · 兼容码 ${row[2].join('、')}`));
+            list.append(entry);
+          }
+          inner.append(list);
+        }
+        block.append(inner);
+        card.append(block);
+      }
+      if (item.history.length) {
+        const block = element('div','history-block');
+        block.append(element('strong','','历史归属记录'));
+        for (const record of item.history) block.append(element('p','',historicalText(record)));
+        card.append(block);
+      }
+      if (item.reasons.length) {
+        const block = element('div','error-block');
+        block.append(element('strong','','异常原因'));
+        for (const reason of item.reasons) block.append(element('p','',reason));
+        card.append(block);
+      }
+      return card;
+    }
+
+    function render() {
+      results.replaceChildren();
+      const visible = currentResults.filter(item => activeFilter === 'all'
+        || (activeFilter === 'valid' && item.valid)
+        || (activeFilter === 'history' && item.kind === '历史区域')
+        || (activeFilter === 'invalid' && !item.valid));
+      if (!visible.length) {
+        const empty = element('div','empty');
+        empty.append(element('div','empty-icon','⌕'),element('strong','',currentResults.length ? '当前筛选下没有结果' : '结果会显示在这里'),element('span','',currentResults.length ? '请选择其他筛选条件。' : '输入号码后点击“开始校验”。'));
+        results.append(empty);
+      } else visible.forEach(item => results.append(renderCard(item)));
+      document.getElementById('totalCount').textContent = currentResults.length;
+      document.getElementById('validCount').textContent = currentResults.filter(item => item.valid).length;
+      document.getElementById('historyCount').textContent = currentResults.filter(item => item.kind === '历史区域').length;
+      document.getElementById('invalidCount').textContent = currentResults.filter(item => !item.valid).length;
+    }
+
+    document.getElementById('checkButton').addEventListener('click',() => {
+      if (!source) { window.alert('未找到 area_data.js，请在项目目录运行 python build_web_data.py。'); return; }
+      currentResults = input.value.split(/[\n,，;；]+/).map(value => value.trim()).filter(Boolean).map(validate);
+      render();
+    });
+    document.getElementById('clearButton').addEventListener('click',() => { input.value=''; currentResults=[]; render(); input.focus(); });
+    document.querySelectorAll('.filter').forEach(button => button.addEventListener('click',() => {
+      activeFilter=button.dataset.filter;
+      document.querySelectorAll('.filter').forEach(other => other.classList.toggle('active',other === button));
+      render();
+    }));
+    render();
+  </script>
+</body>
+</html>

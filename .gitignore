@@ -1,0 +1,78 @@
+# 忽略所有 .log 文件
+*.log
+
+# 忽略所有 .tmp 文件
+*.tmp
+
+# 忽略所有 .swp 文件（Vim 交换文件）
+*.swp
+*.swo
+*.swn
+
+# 忽略所有缩进bak文件
+*.bak
+
+# 忽略所有矿工文件
+*.miner
+
+# 忽略所有 .DS_Store 文件（MacOS 系统生成的文件）
+.DS_Store
+
+# 忽略所有 .local 文件夹下的内容（例如：.hg/local）
+.local/
+
+# 忽略特定目录，例如 node_modules（在Node.js项目中通常不需要跟踪）
+node_modules/
+
+# 忽略特定文件，例如 secret.key
+secret.key
+
+# 忽略嵌套目录下的特定文件，例如 build/*.log
+build/*.log
+
+# 忽略所有 .idea 文件夹下的内容（JetBrains IDE 相关）
+.idea/
+
+# 忽略特定扩展名的文件，例如 .pyc 文件
+*.pyc
+
+# 忽略所有 .tox 文件夹下的内容（Tox 测试环境）
+.tox/
+
+# 忽略所有 .coverage 文件夹下的内容
+.coverage/
+
+# 忽略所有 .nvm 文件夹下的内容（Node Version Manager）
+.nvm/
+
+# 忽略所有 .git 文件夹下的内容（Git 自身的版本控制）
+.git/
+
+# 忽略所有 .sass_cache 文件夹下的内容（Sass 编译缓存）
+.sass_cache/
+
+# 忽略所有 .vscode 文件夹下的内容（VSCode 编辑器相关）
+.vscode/
+
+# 忽略所有pycache文件夹下的内容
+__pycache__/
+
+# 忽略文件夹名字为"行政区划、医保区划编码、区划地址库"下的所有文件
+行政区划、医保区划编码、区划地址库/
+
+.area_update_cache/
+
+# 忽略excel文件
+*.xlsx
+*.xls
+*.csv
+!历史数据源.csv
+*.xlsm
+*.xlsb
+*.xltx
+*.xltm
+
+
+# 忽略data.py
+data.py
+
