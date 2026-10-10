@@ -1,5 +1,8 @@
 # ID-Verification 身份证信息校验工具
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![历史数据许可: CC0 1.0](https://img.shields.io/badge/%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E8%AE%B8%E5%8F%AF-CC0%201.0-lightgrey)](LICENSE.areacodes)
+
 一个基于中华人民共和国国家标准 GB 11643《公民身份号码》规则的身份证号码校验与归属地查询工具，支持 **Excel 批量校验**、**命令行单条查询** 和 **浏览器网页查询** 三种使用方式。
 
 - 地区编码、出生日期、性别顺序码、校验码四项独立校验
